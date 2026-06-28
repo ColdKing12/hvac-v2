@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HVAC System — Painel Administrativo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a18;font-size:14px}
+:root{--blue:#185FA5;--blue-bg:#E6F1FB;--green:#3B6D11;--green-bg:#EAF3DE;--amber:#854F0B;--amber-bg:#FAEEDA;--red:#A32D2D;--red-bg:#FCEBEB;--border:rgba(0,0,0,.09);--border-s:rgba(0,0,0,.16);--r:8px}
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;height:100vh;width:224px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.logo-text{font-size:15px;font-weight:600;color:#1a1a18}
+.logo-sub{font-size:11px;color:#999}
+.nav{flex:1;padding:10px 8px;overflow-y:auto}
+.nav-sec{font-size:10px;color:#bbb;font-weight:700;padding:12px 8px 4px;text-transform:uppercase;letter-spacing:.06em}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;color:#555;font-size:13.5px;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;margin-bottom:2px;transition:background .1s}
+.nav-btn:hover{background:#f4f4f2}
+.nav-btn.active{background:var(--blue-bg);color:var(--blue);font-weight:600}
+.nav-ic{font-size:18px;width:22px;text-align:center}
+.badge{margin-left:auto;background:var(--blue);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700}
+.badge.warn{background:var(--amber)}
+.nb{padding:10px 8px;border-top:1px solid var(--border)}
+.ur{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);cursor:pointer}
+.ur:hover{background:#f4f4f2}
+/* MAIN */
+.main{margin-left:224px;min-height:100vh;padding:24px 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.topbar h1{font-size:20px;font-weight:600}
+.tr{display:flex;align-items:center;gap:8px}
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--r);border:1px solid var(--border-s);background:#fff;color:#1a1a18;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:background .1s;white-space:nowrap}
+.btn:hover{background:#f4f4f2}
+.btn.p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.p:hover{background:#154f8a}
+.btn.g{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.g:hover{background:#2e5509}
+.btn.r{background:var(--red-bg);color:var(--red);border-color:#f09595}
+.btn.r:hover{background:#fadddd}
+.btn.sm{padding:4px 10px;font-size:12px}
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.cl{font-size:12px;color:#999;margin-bottom:6px}
+.cv{font-size:28px;font-weight:600}
+.cs{font-size:12px;color:#666;margin-top:4px}
+/* TABLE CARD */
+.tc{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.th{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.th h2{font-size:14px;font-weight:600;flex:1}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:#999;text-align:left;padding:9px 16px;border-bottom:1px solid var(--border);background:#f8f8f6;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+/* TAGS */
+.tag{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.t-ab{background:var(--blue-bg);color:var(--blue)}
+.t-an{background:var(--amber-bg);color:var(--amber)}
+.t-co{background:var(--green-bg);color:var(--green)}
+.t-ca{background:#f0f0ee;color:#777}
+.t-pr{background:#E1F5EE;color:#0F6E56}
+.t-cr{background:#FAECE7;color:#993C1D}
+.t-in{background:#E6F1FB;color:#185FA5}
+.t-pm{background:#FBEAF0;color:#993556}
+.t-em{background:#FCEBEB;color:#A32D2D}
+.t-ga{background:#F0EAF8;color:#5E2D91}
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.mod{background:#fff;border-radius:16px;width:720px;max-width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mh{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.mh-title{font-size:16px;font-weight:600}
+.mh-sub{font-size:12px;color:#999;margin-top:2px}
+.mb{padding:20px 24px}
+.mf{padding:13px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff}
+/* FORMS */
+.fr{display:grid;gap:12px;margin-bottom:12px}
+.fr.c2{grid-template-columns:1fr 1fr}
+.fr.c3{grid-template-columns:1fr 1fr 1fr}
+.fr.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+label.lbl{font-size:12px;font-weight:500;color:#666}
+input,select,textarea{padding:8px 10px;border:1px solid var(--border-s);border-radius:var(--r);font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;outline:none;transition:border .1s,box-shadow .1s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.12)}
+textarea{resize:vertical;min-height:72px}
+input[disabled],select[disabled]{background:#f4f4f2;color:#999;cursor:not-allowed}
+/* CHECKLIST */
+.ci{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.ci:last-child{border-bottom:none}
+.ci input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.ci label{font-size:13px;cursor:pointer;line-height:1.4}
+/* SECTION TITLE */
+.stl{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.05em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.stl:first-child{margin-top:0}
+/* INFO ROW */
+.ir{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px}
+.ir:last-child{border-bottom:none}
+.il{color:#999}
+.iv{font-weight:500;text-align:right;max-width:65%}
+/* AVATAR */
+.av{border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);flex-shrink:0}
+/* PROGRESS */
+.pb{background:#eee;border-radius:3px;overflow:hidden}
+.pf{height:100%;background:var(--blue);border-radius:3px;transition:width .3s}
+/* MISC */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sb{display:flex;align-items:center;gap:8px;background:#f4f4f2;border:1px solid var(--border);border-radius:var(--r);padding:6px 12px}
+.sb input{border:none;background:transparent;outline:none;font-size:13px;width:180px}
+.fb{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border-s);background:#fff;font-size:12px;cursor:pointer;color:#555;font-family:inherit;white-space:nowrap}
+.chip.a{background:var(--blue-bg);color:var(--blue);border-color:#85B7EB}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mf2{background:#f8f8f6;border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.ml{font-size:11px;color:#999;margin-bottom:3px;font-weight:500}
+.mi{font-size:17px;font-weight:600;border:none;background:transparent;outline:none;width:100%;font-family:inherit}
+.mu{font-size:11px;color:#888}
+.fg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ft{aspect-ratio:1;background:#f4f4f2;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#888;font-size:11px;gap:6px;cursor:pointer}
+.ft.on{background:var(--blue-bg);border-color:#85B7EB;color:var(--blue)}
+.sa{border:2px dashed var(--border-s);border-radius:8px;min-height:90px;display:flex;align-items:center;justify-content:center;color:#888;font-size:13px;gap:8px;background:#f8f8f6}
+.sa.ok{background:var(--green-bg);border-color:#97C459;color:var(--green)}
+.es{text-align:center;padding:48px;color:#999}
+.iblock{background:#f8f8f6;border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.tr2{display:flex;align-items:center;gap:8px}
+.divider{height:1px;background:var(--border);margin:14px 0}
+/* PRINT */
+@media print{
+  .sidebar,.nav-btn,.btn,.topbar-right,.fb,.chip,.mf,.no-print{display:none!important}
+  .main{margin-left:0;padding:0}
+  body{background:#fff}
+  .tc,.mod{box-shadow:none;border:1px solid #ddd}
+  .print-section{display:block!important}
+}
+.print-section{display:none}
+/* AGENDA */
+.ag-cell{padding:6px 8px;vertical-align:top;min-width:100px}
+.ag-event{border-radius:0 5px 5px 0;padding:4px 7px;margin-bottom:4px;cursor:pointer;font-size:11px}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1a18;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== STORAGE (simula backend) =====================
+const DB = {
+  load(key, def) { try { return JSON.parse(localStorage.getItem('hvac_'+key)) || def; } catch(e){ return def; } },
+  save(key, val) { localStorage.setItem('hvac_'+key, JSON.stringify(val)); }
+};
+
+// ===================== DADOS INICIAIS =====================
+function initData() {
+  if (!localStorage.getItem('hvac_init')) {
+    DB.save('clientes', [
+      {id:1,nome:"Loja XPTO",cnpj:"12.345.678/0001-90",resp:"Ana Lima",tel:"(21)99999-0001",email:"ana@xpto.com",end:"Rua do Comércio, 100 - Centro, RJ"},
+      {id:2,nome:"Supermercado Bom Preço",cnpj:"98.765.432/0001-11",resp:"Roberto Santos",tel:"(21)99999-0002",email:"roberto@bompreco.com",end:"Av. Principal, 500 - Tijuca, RJ"},
+      {id:3,nome:"Hotel Verão",cnpj:"11.222.333/0001-44",resp:"Carla Moura",tel:"(21)99999-0003",email:"manut@hotelverao.com",end:"Rua da Praia, 200 - Copacabana, RJ"},
+      {id:4,nome:"Clínica São Paulo",cnpj:"55.666.777/0001-88",resp:"Dr. Paulo Oliveira",tel:"(21)99999-0004",email:"clinica@saopaulorj.com",end:"Rua das Flores, 30 - Botafogo, RJ"},
+    ]);
+    DB.save('tecnicos', [
+      {id:1,nome:"João Silva",ini:"JS",tel:"(21)98888-0001",email:"joao@hvac.com"},
+      {id:2,nome:"Carlos Mendes",ini:"CM",tel:"(21)98888-0002",email:"carlos@hvac.com"},
+      {id:3,nome:"Pedro Costa",ini:"PC",tel:"(21)98888-0003",email:"pedro@hvac.com"},
+    ]);
+    DB.save('equips', [
+      {id:1,cid:1,marca:"Samsung",modelo:"Split Inverter",cap:"24.000 BTU",serie:"SAM-2024-001",pat:"PAT-001",local:"Sala Principal",inst:"2023-05-10",ult:"2025-03-15"},
+      {id:2,cid:1,marca:"Elgin",modelo:"Split Hi-Wall",cap:"12.000 BTU",serie:"ELG-2022-003",pat:"PAT-002",local:"Escritório",inst:"2022-01-20",ult:"2025-01-10"},
+      {id:3,cid:2,marca:"Midea",modelo:"Multi-Split",cap:"36.000 BTU",serie:"MID-2023-007",pat:"PAT-003",local:"Área de Vendas",inst:"2023-08-01",ult:"2024-11-20"},
+      {id:4,cid:3,marca:"Carrier",modelo:"Fan Coil",cap:"48.000 BTU",serie:"CAR-2021-015",pat:"PAT-004",local:"Lobby",inst:"2021-06-15",ult:"2025-02-05"},
+      {id:5,cid:4,marca:"Trane",modelo:"VRF",cap:"60.000 BTU",serie:"TRA-2020-002",pat:"PAT-005",local:"Clínica Geral",inst:"2020-03-20",ult:"2025-01-30"},
+    ]);
+    const CK=["Limpeza dos filtros","Limpeza da evaporadora","Limpeza da condensadora","Verificação de vazamentos","Medição de corrente elétrica","Medição de tensão","Verificação de pressão","Temperatura de insuflação","Temperatura de retorno","Teste de funcionamento"];
+    const CK2=["Verificação de válvulas de expansão","Limpeza de filtros de tela","Teste de comunicação","Verificação de tubulações","Balanceamento de ar"];
+    DB.save('os', [
+      {id:"OS-001",cid:1,eid:1,tipo:"Preventiva",status:"Concluída",tec:1,data:"2026-06-10",hora:"09:00",obs:"Manutenção preventiva semestral",ck:CK.map(t=>({t,ok:true})),med:{ta:"26",ti:"14",tr:"24",ap:"230",bp:"68",cr:"4.2",vt:"220"},fotos:["Antes","Durante","Depois"],sig:true},
+      {id:"OS-002",cid:2,eid:3,tipo:"Corretiva",status:"Em andamento",tec:2,data:"2026-06-26",hora:"08:30",obs:"Equipamento sem refrigeração",ck:CK.map((t,i)=>({t,ok:i<4})),med:{ta:"30",ti:"",tr:"",ap:"",bp:"",cr:"",vt:"220"},fotos:["Antes"],sig:false},
+      {id:"OS-003",cid:3,eid:4,tipo:"PMOC",status:"Aberta",tec:3,data:"2026-06-27",hora:"10:00",obs:"Visita PMOC mensal",ck:CK.map(t=>({t,ok:false})),med:{ta:"",ti:"",tr:"",ap:"",bp:"",cr:"",vt:""},fotos:[],sig:false},
+      {id:"OS-004",cid:4,eid:5,tipo:"Instalação",status:"Aberta",tec:1,data:"2026-06-28",hora:"07:30",obs:"Instalação nova unidade VRF",ck:CK2.map(t=>({t,ok:false})),med:{ta:"",ti:"",tr:"",ap:"",bp:"",cr:"",vt:""},fotos:[],sig:false},
+      {id:"OS-005",cid:1,eid:2,tipo:"Emergência",status:"Aberta",tec:2,data:"2026-06-26",hora:"14:00",obs:"Equipamento ligando e desligando",ck:CK.map(t=>({t,ok:false})),med:{ta:"",ti:"",tr:"",ap:"",bp:"",cr:"",vt:""},fotos:[],sig:false},
+    ]);
+    DB.save('init', true);
+  }
+}
+
+// ===================== STATE =====================
+let page = "dashboard";
+let modal = null; // {type, data}
+let filtroOS = "Todos";
+let buscaOS = "";
+let editForm = {};
+
+// ===================== GETTERS =====================
+const getOS = () => DB.load('os', []);
+const getCL = () => DB.load('clientes', []);
+const getTC = () => DB.load('tecnicos', []);
+const getEQ = () => DB.load('equips', []);
+const cl = (id) => getCL().find(c=>c.id===id)||{};
+const tc = (id) => getTC().find(t=>t.id===id)||{};
+const eq = (id) => getEQ().find(e=>e.id===id)||{};
+
+// ===================== HELPERS =====================
+const TIPO_CLS = {Preventiva:"t-pr",Corretiva:"t-cr","Instalação":"t-in",PMOC:"t-pm","Emergência":"t-em",Garantia:"t-ga"};
+const ST_CLS = {Aberta:"t-ab","Em andamento":"t-an","Concluída":"t-co",Cancelada:"t-ca"};
+const TIPOS = ["Preventiva","Corretiva","Instalação","PMOC","Garantia","Emergência"];
+const STATS = ["Aberta","Em andamento","Concluída","Cancelada"];
+function tag(cls,txt){return`<span class="tag ${cls}">${txt}</span>`;}
+function av(ini,sz=30){return`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${sz<26?10:12}px">${ini||"?"}</div>`;}
+function pb(pct,h=4){return`<div class="pb" style="height:${h}px"><div class="pf" style="width:${pct}%"></div></div>`;}
+function nextId(arr){return arr.length?Math.max(...arr.map(x=>Number(x.id)||0))+1:1;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function fmtDate(d){if(!d)return"";const p=d.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+
+// ===================== RENDER =====================
+function render(){
+  document.getElementById('app').innerHTML = buildApp();
+  bindEvents();
+}
+
+function buildApp(){
+  const OS = getOS();
+  const abertas = OS.filter(o=>o.status==="Aberta").length;
+  const emAnd = OS.filter(o=>o.status==="Em andamento").length;
+  return `
+  <div>
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">❄</div>
+        <div><div class="logo-text">HVAC System</div><div class="logo-sub">Painel v3.0</div></div>
+      </div>
+      <div class="nav">
+        ${nb("dashboard","🏠","Dashboard")}
+        ${nb("os","📋","Ordens de Serviço",abertas+emAnd)}
+        ${nb("agenda","📅","Agenda")}
+        <div class="nav-sec">Cadastros</div>
+        ${nb("clientes","🏢","Clientes")}
+        ${nb("equips","❄","Equipamentos")}
+        ${nb("tecnicos","👷","Técnicos")}
+      </div>
+      <div class="nb">
+        <div class="ur">
+          <div class="av" style="width:30px;height:30px;font-size:12px;background:#f0f0ee;color:#555">A</div>
+          <div><div style="font-size:13px;font-weight:500">Administrador</div><div style="font-size:11px;color:#999">v3.0 · dados salvos</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      ${page==="dashboard"?buildDash():""}
+      ${page==="os"?buildOSPage():""}
+      ${page==="agenda"?buildAgenda():""}
+      ${page==="clientes"?buildClientes():""}
+      ${page==="equips"?buildEquips():""}
+      ${page==="tecnicos"?buildTecnicos():""}
+    </div>
+    ${modal?buildModal():""}
+  </div>`;
+}
+
+function nb(id,ic,label,badge){
+  return`<button class="nav-btn${page===id?" active":""}" data-page="${id}">
+    <span class="nav-ic">${ic}</span>${label}
+    ${badge?`<span class="badge">${badge}</span>`:""}
+  </button>`;
+}
+
+// ===================== DASHBOARD =====================
+function buildDash(){
+  const OS=getOS(),CL=getCL(),TC=getTC();
+  const ab=OS.filter(o=>o.status==="Aberta").length;
+  const an=OS.filter(o=>o.status==="Em andamento").length;
+  const co=OS.filter(o=>o.status==="Concluída").length;
+  const hoje=OS.filter(o=>o.data==="2026-06-26");
+  return`
+  <div class="topbar"><h1>Dashboard</h1><span style="font-size:12px;color:#999">Hoje, 26 jun 2026</span></div>
+  <div class="cards">
+    <div class="card"><div class="cl">Total de OS</div><div class="cv">${OS.length}</div><div class="cs">${CL.length} clientes · ${TC.length} técnicos</div></div>
+    <div class="card"><div class="cl">Abertas</div><div class="cv" style="color:var(--blue)">${ab}</div><div class="cs">aguardando técnico</div></div>
+    <div class="card"><div class="cl">Em andamento</div><div class="cv" style="color:var(--amber)">${an}</div><div class="cs">em campo agora</div></div>
+    <div class="card"><div class="cl">Concluídas</div><div class="cv" style="color:var(--green)">${co}</div><div class="cs">este mês</div></div>
+  </div>
+  <div class="g2">
+    <div class="tc">
+      <div class="th"><h2>OS de hoje</h2>${tag("t-ab",hoje.length+" OS")}</div>
+      <table><thead><tr><th>Hora</th><th>Cliente</th><th>Tipo</th><th>Status</th><th></th></tr></thead><tbody>
+      ${hoje.length?hoje.map(o=>`<tr>
+        <td><strong>${o.hora}</strong></td><td>${cl(o.cid).nome||""}</td>
+        <td>${tag(TIPO_CLS[o.tipo],o.tipo)}</td><td>${tag(ST_CLS[o.status],o.status)}</td>
+        <td><button class="btn sm" data-open-os="${o.id}">Abrir</button></td>
+      </tr>`).join(""):`<tr><td colspan="5" style="text-align:center;color:#999;padding:20px">Nenhuma OS hoje</td></tr>`}
+      </tbody></table>
+    </div>
+    <div class="tc">
+      <div class="th"><h2>Técnicos</h2></div>
+      <table><thead><tr><th>Técnico</th><th>OS hoje</th><th>Progresso</th></tr></thead><tbody>
+      ${TC.map(t=>{
+        const osT=OS.filter(o=>o.tec===t.id&&o.data==="2026-06-26");
+        const d=osT.filter(o=>o.status==="Concluída").length;
+        const p=osT.length?Math.round(d/osT.length*100):0;
+        return`<tr><td><div class="tr2">${av(t.ini||t.nome[0],26)}<span>${t.nome}</span></div></td>
+          <td>${osT.length} OS</td>
+          <td style="min-width:90px"><div style="font-size:11px;color:#999;margin-bottom:3px">${p}%</div>${pb(p,5)}</td>
+        </tr>`;
+      }).join("")}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+// ===================== OS PAGE =====================
+function buildOSPage(){
+  const OS=getOS();
+  const lista=OS.filter(o=>{
+    if(filtroOS!=="Todos"&&o.status!==filtroOS)return false;
+    if(buscaOS){const c=cl(o.cid);return(c.nome||"").toLowerCase().includes(buscaOS.toLowerCase())||o.id.toLowerCase().includes(buscaOS.toLowerCase())||o.tipo.toLowerCase().includes(buscaOS.toLowerCase());}
+    return true;
+  });
+  return`
+  <div class="topbar"><h1>Ordens de Serviço</h1>
+    <div class="tr">
+      <div class="sb">🔍<input id="busca-os" placeholder="Buscar OS, cliente..." value="${buscaOS}"></div>
+      <button class="btn p" data-modal="new-os">＋ Nova OS</button>
+    </div>
+  </div>
+  <div class="fb">
+    ${["Todos","Aberta","Em andamento","Concluída","Cancelada"].map(f=>`<button class="chip${filtroOS===f?" a":""}" data-filtro="${f}">${f}</button>`).join("")}
+    <span style="margin-left:auto;font-size:12px;color:#999">${lista.length} OS encontradas</span>
+  </div>
+  <div class="tc"><table>
+    <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Equipamento</th><th>Tipo</th><th>Técnico</th><th>Status</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${lista.length?lista.map(o=>{
+      const c=cl(o.cid),e=eq(o.eid),t=tc(o.tec);
+      return`<tr>
+        <td style="font-family:monospace;font-size:12px;color:#999">${o.id}</td>
+        <td><div style="font-weight:500">${fmtDate(o.data)}</div><div style="font-size:11px;color:#999">${o.hora}</div></td>
+        <td><div style="font-weight:500">${c.nome||"—"}</div><div style="font-size:11px;color:#999">${e.local||""}</div></td>
+        <td><div>${(e.marca||"")+" "+(e.modelo||"")}</div><div style="font-size:11px;color:#999">${e.cap||""}</div></td>
+        <td>${tag(TIPO_CLS[o.tipo]||"t-ab",o.tipo)}</td>
+        <td><div class="tr2">${av(t.ini||"?",24)}<span>${(t.nome||"").split(" ")[0]}</span></div></td>
+        <td>${tag(ST_CLS[o.status]||"t-ab",o.status)}</td>
+        <td>
+          <div style="display:flex;gap:5px">
+            <button class="btn sm" data-open-os="${o.id}">👁 Ver</button>
+            <button class="btn sm" data-edit-os="${o.id}">✏️</button>
+            <button class="btn sm g" data-print-os="${o.id}">🖨️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join(""):`<tr><td colspan="8" class="es">Nenhuma OS encontrada</td></tr>`}
+    </tbody>
+  </table></div>`;
+}
+
+// ===================== AGENDA =====================
+function buildAgenda(){
+  const OS=getOS(),CL=getCL(),TC=getTC();
+  const dias=["26/06","27/06","28/06","29/06","30/06","01/07","02/07"];
+  const dates=["2026-06-26","2026-06-27","2026-06-28","2026-06-29","2026-06-30","2026-07-01","2026-07-02"];
+  const colors={1:"#185FA5",2:"#0F6E56",3:"#854F0B"};
+  const bgs={1:"#E6F1FB",2:"#E1F5EE",3:"#FAEEDA"};
+  return`
+  <div class="topbar"><h1>Agenda</h1><span style="font-size:12px;color:#999">Semana 26/06 – 02/07/2026</span></div>
+  <div class="tc" style="overflow-x:auto">
+    <table style="table-layout:fixed;min-width:740px">
+      <thead><tr>
+        <th style="width:110px">Técnico</th>
+        ${dias.map((d,i)=>`<th style="text-align:center">${d}${i===0?' <span style="background:var(--blue);color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">hoje</span>':""}</th>`).join("")}
+      </tr></thead>
+      <tbody>
+      ${TC.map(t=>`<tr>
+        <td><div class="tr2">${av(t.ini||t.nome[0],24)}<span style="font-size:12px">${t.nome.split(" ")[0]}</span></div></td>
+        ${dates.map(d=>{
+          const osD=OS.filter(o=>o.data===d&&o.tec===t.id);
+          return`<td class="ag-cell">${osD.map(o=>`
+            <div class="ag-event" style="background:${bgs[t.id]||"#f0f0ee"};border-left:3px solid ${colors[t.id]||"#aaa"}" data-open-os="${o.id}">
+              <div style="font-weight:700;color:${colors[t.id]}">${o.hora}</div>
+              <div style="color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cl(o.cid).nome||""}</div>
+            </div>`).join("")}</td>`;
+        }).join("")}
+      </tr>`).join("")}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ===================== CLIENTES =====================
+function buildClientes(){
+  const CL=getCL(),EQ=getEQ();
+  return`
+  <div class="topbar"><h1>Clientes</h1><button class="btn p" data-modal="new-cl">＋ Novo cliente</button></div>
+  <div class="tc"><table>
+    <thead><tr><th>Cliente</th><th>CNPJ</th><th>Responsável</th><th>Contato</th><th>Equip.</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${CL.map(c=>{
+      const ne=EQ.filter(e=>e.cid===c.id).length;
+      return`<tr>
+        <td><div style="font-weight:500">${c.nome}</div><div style="font-size:11px;color:#999">${c.end}</div></td>
+        <td style="font-family:monospace;font-size:12px">${c.cnpj}</td>
+        <td>${c.resp}</td>
+        <td><div style="font-size:12px">${c.tel}</div><div style="font-size:11px;color:#999">${c.email}</div></td>
+        <td>${tag("t-ab",ne+" equip.")}</td>
+        <td>
+          <div style="display:flex;gap:5px">
+            <button class="btn sm" data-view-cl="${c.id}">👁 Ver</button>
+            <button class="btn sm" data-edit-cl="${c.id}">✏️ Editar</button>
+            <button class="btn sm r" data-del-cl="${c.id}">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+// ===================== EQUIPAMENTOS =====================
+function buildEquips(){
+  const EQ=getEQ(),CL=getCL();
+  return`
+  <div class="topbar"><h1>Equipamentos</h1><button class="btn p" data-modal="new-eq">＋ Novo equipamento</button></div>
+  <div class="tc"><table>
+    <thead><tr><th>Equipamento</th><th>Cliente</th><th>Localização</th><th>Capacidade</th><th>Série</th><th>Última manutenção</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${EQ.map(e=>{
+      const c=CL.find(x=>x.id===e.cid)||{};
+      return`<tr>
+        <td><div style="font-weight:500">${e.marca} ${e.modelo}</div><div style="font-size:11px;color:#999">Pat: ${e.pat}</div></td>
+        <td>${c.nome||"—"}</td><td>${e.local}</td><td>${e.cap}</td>
+        <td style="font-family:monospace;font-size:12px">${e.serie}</td>
+        <td>${e.ult||"—"}</td>
+        <td>
+          <div style="display:flex;gap:5px">
+            <button class="btn sm" data-edit-eq="${e.id}">✏️ Editar</button>
+            <button class="btn sm r" data-del-eq="${e.id}">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+// ===================== TÉCNICOS =====================
+function buildTecnicos(){
+  const TC=getTC();
+  return`
+  <div class="topbar"><h1>Técnicos</h1><button class="btn p" data-modal="new-tc">＋ Novo técnico</button></div>
+  <div class="tc"><table>
+    <thead><tr><th>Técnico</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${TC.map(t=>`<tr>
+      <td><div class="tr2">${av(t.ini||t.nome[0])}<div style="font-weight:500">${t.nome}</div></div></td>
+      <td>${t.tel}</td><td>${t.email||"—"}</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn sm" data-edit-tc="${t.id}">✏️ Editar</button>
+          <button class="btn sm r" data-del-tc="${t.id}">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+// ===================== MODAIS =====================
+function buildModal(){
+  const {type,data}=modal;
+  if(type==="view-os") return buildModalViewOS(data);
+  if(type==="edit-os") return buildModalEditOS(data);
+  if(type==="new-os") return buildModalFormOS(null);
+  if(type==="new-cl"||type==="edit-cl") return buildModalFormCL(data);
+  if(type==="view-cl") return buildModalViewCL(data);
+  if(type==="new-eq"||type==="edit-eq") return buildModalFormEQ(data);
+  if(type==="new-tc"||type==="edit-tc") return buildModalFormTC(data);
+  return "";
+}
+
+function wrapModal(title,sub,body,footer){
+  return`<div class="mbg" id="modal-bg">
+    <div class="mod">
+      <div class="mh">
+        <div><div class="mh-title">${title}</div>${sub?`<div class="mh-sub">${sub}</div>`:""}</div>
+        <button class="btn" id="btn-close-modal">✕ Fechar</button>
+      </div>
+      <div class="mb">${body}</div>
+      <div class="mf">${footer}</div>
+    </div>
+  </div>`;
+}
+
+// VIEW OS
+function buildModalViewOS(o){
+  const c=cl(o.cid),e=eq(o.eid),t=tc(o.tec);
+  const done=o.ck.filter(x=>x.ok).length,pct=Math.round(done/o.ck.length*100);
+  const body=`
+    <div class="stl">Cliente</div>
+    <div class="iblock" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><div style="font-size:11px;color:#999">Nome</div><div style="font-weight:500">${c.nome||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Responsável</div><div>${c.resp||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Telefone</div><div>${c.tel||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Endereço</div><div style="font-size:12px;color:#666">${c.end||""}</div></div>
+    </div>
+    <div class="stl">Equipamento</div>
+    <div class="iblock" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><div style="font-size:11px;color:#999">Modelo</div><div style="font-weight:500">${(e.marca||"")+" "+(e.modelo||"")}</div></div>
+      <div><div style="font-size:11px;color:#999">Capacidade</div><div>${e.cap||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Nº série</div><div style="font-family:monospace;font-size:12px">${e.serie||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Patrimônio</div><div style="font-family:monospace;font-size:12px">${e.pat||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Localização</div><div>${e.local||""}</div></div>
+      <div><div style="font-size:11px;color:#999">Última manutenção</div><div>${e.ult||""}</div></div>
+    </div>
+    <div class="stl">Técnico responsável</div>
+    <div class="tr2" style="padding:8px 0">${av(t.ini||"?",32)}<div><div style="font-weight:500">${t.nome||""}</div><div style="font-size:12px;color:#999">${t.tel||""}</div></div></div>
+    <div class="stl">Checklist — ${done}/${o.ck.length} · ${pct}%</div>
+    <div style="margin-bottom:10px">${pb(pct,5)}</div>
+    ${o.ck.map((c2,i)=>`<div class="ci"><input type="checkbox" id="ckv${i}"${c2.ok?" checked":""}><label for="ckv${i}" style="text-decoration:${c2.ok?"line-through":"none"};color:${c2.ok?"#aaa":"#1a1a18"}">${c2.t}</label></div>`).join("")}
+    <div class="stl">Medições</div>
+    <div class="mg">
+      ${[["ta","Temp. ambiente","°C"],["ti","Temp. insuflação","°C"],["tr","Temp. retorno","°C"],["ap","Alta pressão","bar"],["bp","Baixa pressão","bar"],["cr","Corrente","A"],["vt","Tensão","V"]].map(([k,l,u])=>`
+        <div class="mf2"><div class="ml">${l}</div><div style="display:flex;align-items:baseline;gap:4px">
+          <input class="mi" id="mv-${k}" value="${o.med[k]||""}" placeholder="--">
+          <span class="mu">${u}</span>
+        </div></div>`).join("")}
+    </div>
+    <div class="stl">Fotos</div>
+    <div class="fg-grid">
+      ${["Antes","Durante","Depois"].map(f=>`<div class="ft${o.fotos.includes(f)?" on":""}">
+        ${o.fotos.includes(f)?"📷":"📷"}<div style="font-size:10px">${f}</div>
+      </div>`).join("")}
+    </div>
+    <div class="stl">Assinatura</div>
+    <div class="sa${o.sig?" ok":""}">${o.sig?`✅ <span style="color:var(--green);font-weight:500">Assinado por ${c.resp||""}</span>`:"✏️ Aguardando assinatura"}</div>
+    ${o.obs?`<div class="stl">Observações</div><div style="background:#f8f8f6;border-radius:8px;padding:10px;font-size:13px;color:#555">${o.obs}</div>`:""}
+    <div class="stl">Status</div>
+    <select id="os-status-sel">${STATS.map(s=>`<option${s===o.status?" selected":""}>${s}</option>`)}</select>`;
+  const footer=`
+    <button class="btn g" data-save-os-status="${o.id}">💾 Salvar status</button>
+    <button class="btn p no-print" onclick="printOS('${o.id}')">🖨️ Imprimir OS</button>
+    <button class="btn" data-edit-os="${o.id}">✏️ Editar</button>
+    <button class="btn" id="btn-close-modal">Fechar</button>`;
+  return wrapModal(`OS ${o.id} — ${cl(o.cid).nome||""}`,`${o.data} ${o.hora} · ${tag(TIPO_CLS[o.tipo]||"t-ab",o.tipo)} · ${tag(ST_CLS[o.status],o.status)}`,body,footer);
+}
+
+// EDIT OS FORM
+function buildModalEditOS(o){
+  const CL=getCL(),TC=getTC(),EQ=getEQ();
+  const eqsFilt=EQ.filter(e=>e.cid===(o?o.cid:0));
+  const isNew=!o;
+  const body=`
+    <div class="fr c2">
+      <div class="fg"><label class="lbl">Cliente</label>
+        <select id="f-cid" onchange="updateEqSelect()">${CL.map(c=>`<option value="${c.id}"${o&&o.cid===c.id?" selected":""}>${c.nome}</option>`).join("")}</select>
+      </div>
+      <div class="fg"><label class="lbl">Tipo</label>
+        <select id="f-tipo">${TIPOS.map(t=>`<option${o&&o.tipo===t?" selected":""}>${t}</option>`).join("")}</select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="lbl">Equipamento</label>
+        <select id="f-eid">
+          <option value="">Selecionar...</option>
+          ${eqsFilt.map(e=>`<option value="${e.id}"${o&&o.eid===e.id?" selected":""}>${e.marca} ${e.modelo} — ${e.local}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    <div class="fr c3">
+      <div class="fg"><label class="lbl">Técnico</label>
+        <select id="f-tec">${TC.map(t=>`<option value="${t.id}"${o&&o.tec===t.id?" selected":""}>${t.nome}</option>`).join("")}</select>
+      </div>
+      <div class="fg"><label class="lbl">Data</label><input type="date" id="f-data" value="${o?o.data:"2026-06-27"}"></div>
+      <div class="fg"><label class="lbl">Hora</label><input type="time" id="f-hora" value="${o?o.hora:"08:00"}"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="lbl">Status</label>
+        <select id="f-status">${STATS.map(s=>`<option${o&&o.status===s?" selected":""}>${s}</option>`).join("")}</select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="lbl">Observações</label><textarea id="f-obs">${o?o.obs:""}</textarea></div>
+    </div>`;
+  const footer=`
+    <button class="btn" id="btn-close-modal">Cancelar</button>
+    <button class="btn p" data-save-os-form="${o?o.id:"new"}">💾 ${isNew?"Criar OS":"Salvar alterações"}</button>`;
+  return wrapModal(isNew?"Nova Ordem de Serviço":`Editar OS ${o?o.id:""}`,isNew?"Preencha os dados da nova OS":null,body,footer);
+}
+
+function buildModalFormOS(o){ return buildModalEditOS(o); }
+
+// FORM CLIENTE
+function buildModalFormCL(c){
+  const isNew=!c;
+  const body=`
+    <div class="fr c2">
+      <div class="fg"><label class="lbl">Razão social *</label><input id="f-nome" value="${c?c.nome:""}" placeholder="Nome da empresa"></div>
+      <div class="fg"><label class="lbl">CNPJ</label><input id="f-cnpj" value="${c?c.cnpj:""}" placeholder="00.000.000/0000-00"></div>
+    </div>
+    <div class="fr c2">
+      <div class="fg"><label class="lbl">Responsável</label><input id="f-resp" value="${c?c.resp:""}"></div>
+      <div class="fg"><label class="lbl">Telefone</label><input id="f-tel" value="${c?c.tel:""}"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="lbl">E-mail</label><input type="email" id="f-email" value="${c?c.email:""}"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="lbl">Endereço completo</label><input id="f-end" value="${c?c.end:""}"></div>
+    </div>`;
+  const footer=`
+    <button class="btn" id="btn-close-modal">Cancelar</button>
+    <button class="btn p" data-save-cl="${c?c.id:"new"}">💾 ${isNew?"Cadastrar":"Salvar"}</button>`;
+  return wrapModal(isNew?"Novo cliente":`Editar: ${c?c.nome:""}`,null,body,footer);
+}
+
+function buildModalViewCL(c){
+  const EQ=getEQ();
+  const eqs=EQ.filter(e=>e.cid===c.id);
+  const body=`
+    ${[["CNPJ",c.cnpj],["Responsável",c.resp],["Telefone",c.tel],["E-mail",c.email],["Endereço",c.end]].map(([l,v])=>`<div class="ir"><span class="il">${l}</span><span class="iv">${v||"—"}</span></div>`).join("")}
+    <div class="stl">Equipamentos cadastrados</div>
+    ${eqs.length?eqs.map(e=>`<div class="iblock" style="margin-bottom:8px"><div style="font-weight:500">${e.marca} ${e.modelo} — ${e.cap}</div><div style="font-size:12px;color:#999">Série: ${e.serie} · ${e.local} · Última manutenção: ${e.ult||"—"}</div></div>`).join(""):`<div style="color:#999;font-size:13px">Nenhum equipamento cadastrado.</div>`}`;
+  const footer=`<button class="btn" data-edit-cl="${c.id}">✏️ Editar</button><button class="btn" id="btn-close-modal">Fechar</button>`;
+  return wrapModal(c.nome,`CNPJ: ${c.cnpj}`,body,footer);
+}
+
+// FORM EQUIPAMENTO
+function buildModalFormEQ(e){
+  const CL=getCL(),isNew=!e;
+  const body=`
+    <div class="fr">
+      <div class="fg"><label class="lbl">Cliente *</label>
+        <select id="f-cid">${CL.map(c=>`<option value="${c.id}"${e&&e.cid===c.id?" selected":""}>${c.nome}</option>`).join("")}</select>
+      </div>
+    </div>
+    <div class="fr c2">
+      <div class="fg"><label class="lbl">Marca *</label><input id="f-marca" value="${e?e.marca:""}" placeholder="Samsung, Carrier..."></div>
+      <div class="fg"><label class="lbl">Modelo</label><input id="f-modelo" value="${e?e.modelo:""}" placeholder="Split Inverter..."></div>
+    </div>
+    <div class="fr c3">
+      <div class="fg"><label class="lbl">Capacidade</label><input id="f-cap" value="${e?e.cap:""}" placeholder="24.000 BTU"></div>
+      <div class="fg"><label class="lbl">Nº de série</label><input id="f-serie" value="${e?e.serie:""}"></div>
+      <div class="fg"><label class="lbl">Patrimônio</label><input id="f-pat" value="${e?e.pat:""}"></div>
+    </div>
+    <div class="fr c2">
+      <div class="fg"><label class="lbl">Localização</label><input id="f-local" value="${e?e.local:""}" placeholder="Sala, corredor..."></div>
+      <div class="fg"><label class="lbl">Data instalação</label><input type="date" id="f-inst" value="${e?e.inst:""}"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="lbl">Data última manutenção</label><input type="date" id="f-ult" value="${e?e.ult:""}"></div>
+    </div>`;
+  const footer=`<button class="btn" id="btn-close-modal">Cancelar</button><button class="btn p" data-save-eq="${e?e.id:"new"}">💾 ${isNew?"Cadastrar":"Salvar"}</button>`;
+  return wrapModal(isNew?"Novo equipamento":`Editar: ${e?(e.marca+" "+e.modelo):""}`,null,body,footer);
+}
+
+// FORM TÉCNICO
+function buildModalFormTC(t){
+  const isNew=!t;
+  const body=`
+    <div class="fr">
+      <div class="fg"><label class="lbl">Nome completo *</label><input id="f-nome" value="${t?t.nome:""}"></div>
+    </div>
+    <div class="fr c2">
+      <div class="fg"><label class="lbl">Telefone</label><input id="f-tel" value="${t?t.tel:""}"></div>
+      <div class="fg"><label class="lbl">E-mail</label><input type="email" id="f-email" value="${t?t.email:""}"></div>
+    </div>`;
+  const footer=`<button class="btn" id="btn-close-modal">Cancelar</button><button class="btn p" data-save-tc="${t?t.id:"new"}">💾 ${isNew?"Cadastrar":"Salvar"}</button>`;
+  return wrapModal(isNew?"Novo técnico":`Editar: ${t?t.nome:""}`,null,body,footer);
+}
+
+// ===================== PRINT OS =====================
+function printOS(id){
+  const OS=getOS(),o=OS.find(x=>x.id===id);
+  if(!o)return;
+  const c=cl(o.cid),e=eq(o.eid),t=tc(o.tec);
+  const done=o.ck.filter(x=>x.ok).length,pct=Math.round(done/o.ck.length*100);
+  const win=window.open("","_blank","width=800,height=700");
+  win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>OS ${o.id}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a18;padding:30px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #185FA5}
+    .logo{font-size:22px;font-weight:700;color:#185FA5}
+    .logo-sub{font-size:12px;color:#888}
+    .os-id{font-size:20px;font-weight:700;text-align:right}
+    .os-meta{font-size:12px;color:#888;text-align:right;margin-top:2px}
+    .section{margin-bottom:18px}
+    .section-title{font-size:11px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #ddd}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+    .field{background:#f8f8f6;border-radius:5px;padding:8px 10px}
+    .field-label{font-size:10px;color:#888;margin-bottom:3px;text-transform:uppercase}
+    .field-value{font-size:13px;font-weight:500}
+    .ck-list{columns:2;gap:20px}
+    .ck-item{display:flex;align-items:center;gap:8px;padding:5px 0;break-inside:avoid;border-bottom:1px solid #f0f0ee}
+    .ck-box{width:16px;height:16px;border:2px solid #185FA5;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:#185FA5;font-weight:700}
+    .ck-box.ok{background:#185FA5;color:#fff}
+    .med-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .med-field{border:1px solid #ddd;border-radius:5px;padding:8px 10px}
+    .med-val{font-size:18px;font-weight:700}
+    .med-unit{font-size:11px;color:#888}
+    .foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+    .foto-box{aspect-ratio:4/3;border:1px solid #ddd;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;background:#f8f8f6}
+    .sign-box{border:1px solid #ddd;border-radius:5px;min-height:80px;display:flex;align-items:center;justify-content:center;background:#f8f8f6;color:${o.sig?"#3B6D11":"#888"};font-weight:${o.sig?"600":"400"}}
+    .footer{margin-top:30px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:11px;color:#aaa}
+    .tag{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+    @media print{button{display:none}}
+  </style></head><body>
+  <div class="header">
+    <div><div class="logo">❄ HVAC System</div><div class="logo-sub">Ordem de Serviço</div></div>
+    <div><div class="os-id">${o.id}</div><div class="os-meta">${fmtDate(o.data)} às ${o.hora}</div><div class="os-meta" style="margin-top:4px">Tipo: ${o.tipo} · Status: ${o.status}</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Dados do cliente</div>
+    <div class="grid2">
+      <div class="field"><div class="field-label">Cliente</div><div class="field-value">${c.nome||"—"}</div></div>
+      <div class="field"><div class="field-label">Responsável</div><div class="field-value">${c.resp||"—"}</div></div>
+      <div class="field"><div class="field-label">Telefone</div><div class="field-value">${c.tel||"—"}</div></div>
+      <div class="field"><div class="field-label">Endereço</div><div class="field-value" style="font-size:12px">${c.end||"—"}</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Equipamento</div>
+    <div class="grid2">
+      <div class="field"><div class="field-label">Modelo</div><div class="field-value">${(e.marca||"")+" "+(e.modelo||"")}</div></div>
+      <div class="field"><div class="field-label">Capacidade</div><div class="field-value">${e.cap||"—"}</div></div>
+      <div class="field"><div class="field-label">Nº de série</div><div class="field-value" style="font-family:monospace">${e.serie||"—"}</div></div>
+      <div class="field"><div class="field-label">Patrimônio</div><div class="field-value" style="font-family:monospace">${e.pat||"—"}</div></div>
+      <div class="field"><div class="field-label">Localização</div><div class="field-value">${e.local||"—"}</div></div>
+      <div class="field"><div class="field-label">Última manutenção</div><div class="field-value">${e.ult||"—"}</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Técnico responsável</div>
+    <div class="grid2">
+      <div class="field"><div class="field-label">Nome</div><div class="field-value">${t.nome||"—"}</div></div>
+      <div class="field"><div class="field-label">Telefone</div><div class="field-value">${t.tel||"—"}</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Checklist — ${done}/${o.ck.length} itens (${pct}%)</div>
+    <div class="ck-list">
+      ${o.ck.map(c2=>`<div class="ck-item"><div class="ck-box${c2.ok?" ok":""}">${c2.ok?"✓":""}</div><span>${c2.t}</span></div>`).join("")}
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Medições</div>
+    <div class="med-grid">
+      ${[["ta","Temp. ambiente","°C"],["ti","Temp. insuflação","°C"],["tr","Temp. retorno","°C"],["ap","Alta pressão","bar"],["bp","Baixa pressão","bar"],["cr","Corrente","A"],["vt","Tensão","V"]].map(([k,l,u])=>`
+        <div class="med-field"><div class="field-label">${l}</div><div class="med-val">${o.med[k]||"—"}<span class="med-unit"> ${o.med[k]?u:""}</span></div></div>`).join("")}
+    </div>
+  </div>
+  ${o.obs?`<div class="section"><div class="section-title">Observações</div><div style="background:#f8f8f6;border-radius:5px;padding:10px">${o.obs}</div></div>`:""}
+  <div class="section">
+    <div class="section-title">Assinatura do cliente</div>
+    <div class="sign-box">${o.sig?`✅ Assinado por ${c.resp||""}`:"Aguardando assinatura"}</div>
+  </div>
+  <div class="footer">
+    <span>HVAC System · Ordem de Serviço ${o.id}</span>
+    <span>Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+  </div>
+  <br><button onclick="window.print()" style="padding:10px 20px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">🖨️ Imprimir</button>
+  </body></html>`);
+  win.document.close();
+}
+
+// ===================== BIND EVENTS =====================
+function bindEvents(){
+  // Navegação
+  document.querySelectorAll("[data-page]").forEach(el=>{
+    el.onclick=()=>{page=el.dataset.page;modal=null;render();};
+  });
+
+  // Filtros OS
+  document.querySelectorAll("[data-filtro]").forEach(el=>{
+    el.onclick=()=>{filtroOS=el.dataset.filtro;render();};
+  });
+
+  // Busca OS
+  const bs=document.getElementById("busca-os");
+  if(bs) bs.oninput=()=>{buscaOS=bs.value;render();};
+
+  // Abrir OS (ver)
+  document.querySelectorAll("[data-open-os]").forEach(el=>{
+    el.onclick=()=>{const o=getOS().find(x=>x.id===el.dataset.openOs);if(o){modal={type:"view-os",data:o};render();}};
+  });
+
+  // Editar OS
+  document.querySelectorAll("[data-edit-os]").forEach(el=>{
+    el.onclick=()=>{const o=getOS().find(x=>x.id===el.dataset.editOs);if(o){modal={type:"edit-os",data:o};render();}};
+  });
+
+  // Imprimir OS
+  document.querySelectorAll("[data-print-os]").forEach(el=>{
+    el.onclick=()=>printOS(el.dataset.printOs);
+  });
+
+  // Salvar status OS (na modal de view)
+  document.querySelectorAll("[data-save-os-status]").forEach(el=>{
+    el.onclick=()=>{
+      const sel=document.getElementById("os-status-sel");
+      if(!sel)return;
+      const OS=getOS();
+      const idx=OS.findIndex(x=>x.id===el.dataset.saveOsStatus);
+      if(idx>=0){OS[idx].status=sel.value;DB.save('os',OS);}
+      modal=null;render();toast("Status atualizado!");
+    };
+  });
+
+  // Salvar OS form (new/edit)
+  document.querySelectorAll("[data-save-os-form]").forEach(el=>{
+    el.onclick=()=>{
+      const cid=parseInt(document.getElementById("f-cid")?.value);
+      const tec=parseInt(document.getElementById("f-tec")?.value);
+      if(!cid||!tec){alert("Preencha cliente e técnico");return;}
+      const OS=getOS();
+      const CK=["Limpeza dos filtros","Limpeza da evaporadora","Limpeza da condensadora","Verificação de vazamentos","Medição de corrente elétrica","Medição de tensão","Verificação de pressão","Temperatura de insuflação","Temperatura de retorno","Teste de funcionamento"];
+      const isNew=el.dataset.saveOsForm==="new";
+      if(isNew){
+        OS.push({
+          id:"OS-"+String(nextId(OS)).padStart(3,"0"),
+          cid,eid:parseInt(document.getElementById("f-eid")?.value)||0,
+          tipo:document.getElementById("f-tipo")?.value||"Preventiva",
+          status:document.getElementById("f-status")?.value||"Aberta",
+          tec,
+          data:document.getElementById("f-data")?.value||"",
+          hora:document.getElementById("f-hora")?.value||"",
+          obs:document.getElementById("f-obs")?.value||"",
+          ck:CK.map(t=>({t,ok:false})),
+          med:{ta:"",ti:"",tr:"",ap:"",bp:"",cr:"",vt:""},
+          fotos:[],sig:false
+        });
+        toast("OS criada com sucesso!");
+      } else {
+        const idx=OS.findIndex(x=>x.id===el.dataset.saveOsForm);
+        if(idx>=0){
+          OS[idx]={...OS[idx],
+            cid,eid:parseInt(document.getElementById("f-eid")?.value)||OS[idx].eid,
+            tipo:document.getElementById("f-tipo")?.value||OS[idx].tipo,
+            status:document.getElementById("f-status")?.value||OS[idx].status,
+            tec,
+            data:document.getElementById("f-data")?.value||OS[idx].data,
+            hora:document.getElementById("f-hora")?.value||OS[idx].hora,
+            obs:document.getElementById("f-obs")?.value||OS[idx].obs,
+          };
+        }
+        toast("OS atualizada!");
+      }
+      DB.save('os',OS);modal=null;render();
+    };
+  });
+
+  // Modais
+  document.querySelectorAll("[data-modal]").forEach(el=>{
+    el.onclick=()=>{
+      const t=el.dataset.modal;
+      if(t==="new-os") modal={type:"new-os",data:null};
+      else if(t==="new-cl") modal={type:"new-cl",data:null};
+      else if(t==="new-eq") modal={type:"new-eq",data:null};
+      else if(t==="new-tc") modal={type:"new-tc",data:null};
+      render();
+    };
+  });
+
+  // View cliente
+  document.querySelectorAll("[data-view-cl]").forEach(el=>{
+    el.onclick=()=>{const c=getCL().find(x=>x.id===parseInt(el.dataset.viewCl));if(c){modal={type:"view-cl",data:c};render();}};
+  });
+
+  // Editar cliente
+  document.querySelectorAll("[data-edit-cl]").forEach(el=>{
+    el.onclick=()=>{const c=getCL().find(x=>x.id===parseInt(el.dataset.editCl));if(c){modal={type:"edit-cl",data:c};render();}};
+  });
+
+  // Salvar cliente
+  document.querySelectorAll("[data-save-cl]").forEach(el=>{
+    el.onclick=()=>{
+      const nome=document.getElementById("f-nome")?.value;
+      if(!nome){alert("Nome obrigatório");return;}
+      const CL=getCL();
+      const isNew=el.dataset.saveCl==="new";
+      if(isNew){
+        CL.push({id:nextId(CL),nome,cnpj:document.getElementById("f-cnpj")?.value||"",resp:document.getElementById("f-resp")?.value||"",tel:document.getElementById("f-tel")?.value||"",email:document.getElementById("f-email")?.value||"",end:document.getElementById("f-end")?.value||""});
+        toast("Cliente cadastrado!");
+      } else {
+        const idx=CL.findIndex(x=>x.id===parseInt(el.dataset.saveCl));
+        if(idx>=0) CL[idx]={...CL[idx],nome,cnpj:document.getElementById("f-cnpj")?.value||"",resp:document.getElementById("f-resp")?.value||"",tel:document.getElementById("f-tel")?.value||"",email:document.getElementById("f-email")?.value||"",end:document.getElementById("f-end")?.value||""};
+        toast("Cliente atualizado!");
+      }
+      DB.save('clientes',CL);modal=null;render();
+    };
+  });
+
+  // Deletar cliente
+  document.querySelectorAll("[data-del-cl]").forEach(el=>{
+    el.onclick=()=>{if(!confirm("Excluir este cliente?"))return;const CL=getCL().filter(x=>x.id!==parseInt(el.dataset.delCl));DB.save('clientes',CL);toast("Cliente excluído.");render();};
+  });
+
+  // Editar equipamento
+  document.querySelectorAll("[data-edit-eq]").forEach(el=>{
+    el.onclick=()=>{const e=getEQ().find(x=>x.id===parseInt(el.dataset.editEq));if(e){modal={type:"edit-eq",data:e};render();}};
+  });
+
+  // Salvar equipamento
+  document.querySelectorAll("[data-save-eq]").forEach(el=>{
+    el.onclick=()=>{
+      const cid=parseInt(document.getElementById("f-cid")?.value);
+      const marca=document.getElementById("f-marca")?.value;
+      if(!cid||!marca){alert("Cliente e marca são obrigatórios");return;}
+      const EQ=getEQ();
+      const isNew=el.dataset.saveEq==="new";
+      const edata={cid,marca,modelo:document.getElementById("f-modelo")?.value||"",cap:document.getElementById("f-cap")?.value||"",serie:document.getElementById("f-serie")?.value||"",pat:document.getElementById("f-pat")?.value||"",local:document.getElementById("f-local")?.value||"",inst:document.getElementById("f-inst")?.value||"",ult:document.getElementById("f-ult")?.value||""};
+      if(isNew){EQ.push({id:nextId(EQ),...edata});toast("Equipamento cadastrado!");}
+      else{const idx=EQ.findIndex(x=>x.id===parseInt(el.dataset.saveEq));if(idx>=0)EQ[idx]={...EQ[idx],...edata};toast("Equipamento atualizado!");}
+      DB.save('equips',EQ);modal=null;render();
+    };
+  });
+
+  // Deletar equipamento
+  document.querySelectorAll("[data-del-eq]").forEach(el=>{
+    el.onclick=()=>{if(!confirm("Excluir este equipamento?"))return;const EQ=getEQ().filter(x=>x.id!==parseInt(el.dataset.delEq));DB.save('equips',EQ);toast("Equipamento excluído.");render();};
+  });
+
+  // Editar técnico
+  document.querySelectorAll("[data-edit-tc]").forEach(el=>{
+    el.onclick=()=>{const t=getTC().find(x=>x.id===parseInt(el.dataset.editTc));if(t){modal={type:"edit-tc",data:t};render();}};
+  });
+
+  // Salvar técnico
+  document.querySelectorAll("[data-save-tc]").forEach(el=>{
+    el.onclick=()=>{
+      const nome=document.getElementById("f-nome")?.value;
+      if(!nome){alert("Nome obrigatório");return;}
+      const ini=nome.split(" ").slice(0,2).map(p=>p[0]).join("").toUpperCase();
+      const TC=getTC();
+      const isNew=el.dataset.saveTc==="new";
+      const tdata={nome,ini,tel:document.getElementById("f-tel")?.value||"",email:document.getElementById("f-email")?.value||""};
+      if(isNew){TC.push({id:nextId(TC),...tdata});toast("Técnico cadastrado!");}
+      else{const idx=TC.findIndex(x=>x.id===parseInt(el.dataset.saveTc));if(idx>=0)TC[idx]={...TC[idx],...tdata};toast("Técnico atualizado!");}
+      DB.save('tecnicos',TC);modal=null;render();
+    };
+  });
+
+  // Deletar técnico
+  document.querySelectorAll("[data-del-tc]").forEach(el=>{
+    el.onclick=()=>{if(!confirm("Excluir este técnico?"))return;const TC=getTC().filter(x=>x.id!==parseInt(el.dataset.delTc));DB.save('tecnicos',TC);toast("Técnico excluído.");render();};
+  });
+
+  // Fechar modal
+  const btnClose=document.getElementById("btn-close-modal");
+  if(btnClose) btnClose.onclick=()=>{modal=null;render();};
+  const mbg=document.getElementById("modal-bg");
+  if(mbg) mbg.onclick=(e)=>{if(e.target===mbg){modal=null;render();}};
+
+  // Update select equipamentos ao trocar cliente no form OS
+  window.updateEqSelect=()=>{
+    const cid=parseInt(document.getElementById("f-cid")?.value);
+    const sel=document.getElementById("f-eid");
+    if(!sel)return;
+    const EQ=getEQ().filter(e=>e.cid===cid);
+    sel.innerHTML=`<option value="">Selecionar...</option>${EQ.map(e=>`<option value="${e.id}">${e.marca} ${e.modelo} — ${e.local}</option>`).join("")}`;
+  };
+}
+
+// ===================== INIT =====================
+initData();
+render();
+</script>
+</body>
+</html>

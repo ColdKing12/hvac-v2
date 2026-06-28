@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C447C">
+<title>HVAC System — Técnico</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a18;font-size:15px;max-width:480px;margin:0 auto;min-height:100vh}
+:root{--blue:#185FA5;--blue-bg:#E6F1FB;--green:#3B6D11;--green-bg:#EAF3DE;--amber:#854F0B;--amber-bg:#FAEEDA;--red:#A32D2D;--red-bg:#FCEBEB}
+
+/* STATUS BAR */
+.status-bar{background:#0C447C;height:env(safe-area-inset-top,0px);width:100%}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex}
+
+/* LOGIN */
+.login-hero{background:linear-gradient(160deg,#0C447C,#185FA5 60%,#378ADD);padding:60px 24px 40px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.login-logo{width:80px;height:80px;background:rgba(255,255,255,.15);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:20px}
+.login-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:6px}
+.login-sub{font-size:15px;color:rgba(255,255,255,.7)}
+.login-form{background:#fff;border-radius:24px 24px 0 0;flex:1;padding:28px 24px;margin-top:-20px}
+.login-form h2{font-size:20px;font-weight:700;margin-bottom:20px;color:#1a1a18}
+.field-group{margin-bottom:16px}
+.field-group label{display:block;font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.field-group input{width:100%;padding:14px 16px;border:1.5px solid #e5e5e3;border-radius:12px;font-size:16px;font-family:inherit;outline:none;color:#1a1a18;background:#fafaf8;transition:border .15s}
+.field-group input:focus{border-color:var(--blue)}
+.btn-primary{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:active{background:#154f8a}
+.btn-primary:disabled{background:#aaa;cursor:not-allowed}
+.btn-secondary{width:100%;padding:14px;background:#f0f0ee;color:#1a1a18;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-success{width:100%;padding:16px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.error-box{background:var(--red-bg);color:var(--red);border-radius:10px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:16px;display:none}
+.error-box.show{display:block}
+
+/* TOP NAV */
+.topnav{background:#fff;padding:16px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:50}
+.topnav h2{font-size:17px;font-weight:700;flex:1;color:#1a1a18}
+.back-btn{width:38px;height:38px;border-radius:50%;background:#f0f0ee;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#1a1a18;flex-shrink:0}
+.tag{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.t-cr{background:#FAECE7;color:#993C1D}
+.t-pr{background:#E1F5EE;color:#0F6E56}
+.t-pm{background:#FBEAF0;color:#993556}
+.t-in{background:#E6F1FB;color:#185FA5}
+.t-em{background:#FCEBEB;color:#A32D2D}
+.t-ga{background:#F0EAF8;color:#5E2D91}
+.t-ab{background:#E6F1FB;color:#185FA5}
+.t-an{background:#FAEEDA;color:#854F0B}
+.t-co{background:#EAF3DE;color:#3B6D11}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+.pad{padding:16px}
+
+/* HOME */
+.home-header{background:linear-gradient(135deg,#0C447C,#185FA5);padding:24px 20px 28px;color:#fff}
+.home-greeting{font-size:24px;font-weight:800;margin-bottom:4px}
+.home-date{font-size:14px;color:rgba(255,255,255,.7)}
+.home-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:18px}
+.stat-box{background:rgba(255,255,255,.15);border-radius:14px;padding:12px 8px;text-align:center}
+.stat-val{font-size:28px;font-weight:800}
+.stat-lbl{font-size:10px;color:rgba(255,255,255,.7);font-weight:600;margin-top:2px}
+.alert-card{background:#FCEBEB;border-left:4px solid #A32D2D;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px;color:#A32D2D;font-weight:600}
+.sec-label{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin:16px 0 10px}
+.sec-label:first-child{margin-top:0}
+
+/* OS CARD */
+.os-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;border:1px solid #eee;cursor:pointer;transition:transform .1s,box-shadow .1s;active:transform scale(.98)}
+.os-card:active{transform:scale(.97);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.os-time{font-size:30px;font-weight:800;color:#1a1a18;line-height:1}
+.os-client{font-size:15px;font-weight:700;color:#1a1a18;margin:6px 0 3px}
+.os-addr{font-size:12px;color:#aaa}
+.os-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.os-id{font-size:11px;color:#aaa;font-family:monospace}
+.os-link{font-size:13px;color:var(--blue);font-weight:700}
+
+/* TABS */
+.tabs{display:flex;background:#fff;border-bottom:1px solid #eee;position:sticky;top:57px;z-index:40}
+.tab{flex:1;padding:12px 4px 10px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;border-bottom:3px solid transparent;font-family:inherit;transition:border-color .15s}
+.tab.on{border-bottom-color:var(--blue)}
+.tab-ic{font-size:20px;color:#ccc}
+.tab.on .tab-ic{color:var(--blue)}
+.tab-lb{font-size:10px;font-weight:700;color:#ccc}
+.tab.on .tab-lb{color:var(--blue)}
+
+/* INFO BLOCKS */
+.iblock{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid #eee}
+.irow{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f5f5f3}
+.irow:last-child{border-bottom:none}
+.ilabel{font-size:12px;color:#aaa;flex-shrink:0;margin-right:12px}
+.ival{font-size:13px;font-weight:600;color:#1a1a18;text-align:right}
+.maps-btn{display:flex;align-items:center;gap:8px;color:var(--blue);font-size:14px;font-weight:700;margin-top:8px;cursor:pointer;text-decoration:none}
+
+/* CHECKLIST */
+.ck-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #f5f5f3;cursor:pointer}
+.ck-item:last-child{border-bottom:none}
+.ck-box{width:26px;height:26px;border-radius:8px;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:16px}
+.ck-box.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.ck-label{font-size:14px;color:#1a1a18;flex:1;line-height:1.4}
+.ck-label.done{color:#bbb;text-decoration:line-through}
+.pb{background:#eee;height:8px;border-radius:4px;overflow:hidden;margin-bottom:6px}
+.pf{height:100%;background:var(--blue);border-radius:4px;transition:width .3s}
+.pct-label{font-size:12px;color:var(--blue);font-weight:700;text-align:right;margin-bottom:12px}
+
+/* MEDIÇÕES */
+.med-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.med-card{background:#fff;border:1px solid #eee;border-radius:14px;padding:12px 14px}
+.med-label{font-size:10px;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.med-input{font-size:24px;font-weight:800;color:#1a1a18;border:none;background:transparent;outline:none;width:100%;font-family:inherit}
+.med-input::placeholder{color:#ddd;font-weight:400;font-size:18px}
+.med-unit{font-size:12px;color:#bbb;margin-top:2px}
+
+/* FOTOS */
+.foto-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.foto-box{aspect-ratio:1;border-radius:14px;border:2px dashed #ddd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:30px;color:#ccc;background:#fafaf8;transition:all .15s}
+.foto-box:active{transform:scale(.95)}
+.foto-box.ok{background:var(--blue-bg);border-color:#85B7EB;border-style:solid;color:var(--blue)}
+.foto-lbl{font-size:11px;font-weight:600}
+.sign-area{background:#f5f5f3;border:2px dashed #ddd;border-radius:16px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#bbb;font-size:15px;cursor:pointer;transition:all .15s;text-align:center;padding:20px;margin-bottom:12px}
+.sign-area:active{transform:scale(.98)}
+.sign-area.ok{background:var(--green-bg);border-color:#97C459;border-style:solid;color:var(--green)}
+.sign-icon{font-size:36px}
+
+/* BOTTOM NAV */
+.bottom-nav{background:#fff;border-top:1px solid #eee;display:flex;padding-bottom:env(safe-area-inset-bottom,0px);position:sticky;bottom:0;z-index:50}
+.nav-tab{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border:none;background:transparent;font-family:inherit}
+.nav-tab .nic{font-size:24px;color:#ccc}
+.nav-tab .nlb{font-size:10px;color:#ccc;font-weight:700}
+.nav-tab.on .nic,.nav-tab.on .nlb{color:var(--blue)}
+
+/* CONCLUIDA */
+.concl-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px;text-align:center}
+.concl-icon{width:96px;height:96px;background:var(--green-bg);border-radius:48px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:0 auto 24px}
+
+/* AVATAR */
+.avatar{border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--blue);flex-shrink:0}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:#aaa}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-text{font-size:15px;font-weight:600}
+.empty-sub{font-size:13px;margin-top:6px}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:#aaa}
+.spin{width:36px;height:36px;border:3px solid #eee;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a18;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* PERFIL */
+.perfil-header{background:linear-gradient(135deg,#0C447C,#185FA5);padding:32px 20px 28px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#fff}
+.perfil-avatar{width:80px;height:80px;border-radius:40px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;margin-bottom:14px}
+.perfil-nome{font-size:22px;font-weight:800}
+.perfil-cargo{font-size:14px;color:rgba(255,255,255,.7);margin-top:4px}
+.perfil-item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid #eee}
+.perfil-item-ic{font-size:22px;width:32px;text-align:center}
+.perfil-item-info{flex:1}
+.perfil-item-label{font-size:11px;color:#aaa;font-weight:600}
+.perfil-item-val{font-size:14px;font-weight:600;color:#1a1a18}
+.btn-logout{width:100%;padding:15px;background:var(--red-bg);color:var(--red);border:1px solid #F09595;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+</style>
+</head>
+<body>
+<div class="status-bar"></div>
+<div class="toast" id="toast"></div>
+
+<!-- =================== LOGIN =================== -->
+<div class="screen active" id="screen-login">
+  <div class="login-hero">
+    <div class="login-logo">❄️</div>
+    <div class="login-title">HVAC System</div>
+    <div class="login-sub">Aplicativo do técnico</div>
+  </div>
+  <div class="login-form">
+    <h2>Entrar na conta</h2>
+    <div class="error-box" id="login-error">Usuário ou senha incorretos.</div>
+    <div class="field-group">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div class="field-group">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="btn-login">🔐 Entrar</button>
+  </div>
+</div>
+
+<!-- =================== HOME =================== -->
+<div class="screen" id="screen-home">
+  <div class="home-header">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="home-greeting" id="home-greeting">Olá! 👋</div>
+        <div class="home-date" id="home-date"></div>
+      </div>
+      <div class="avatar" id="home-avatar" style="width:52px;height:52px;font-size:18px;background:rgba(255,255,255,.2);color:#fff"></div>
+    </div>
+    <div class="home-stats">
+      <div class="stat-box"><div class="stat-val" id="st-total">0</div><div class="stat-lbl">OS hoje</div></div>
+      <div class="stat-box"><div class="stat-val" id="st-aber">0</div><div class="stat-lbl">Abertas</div></div>
+      <div class="stat-box"><div class="stat-val" id="st-conc">0</div><div class="stat-lbl">Concluídas</div></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="pad">
+      <div id="home-alertas"></div>
+      <div class="sec-label">Minhas OS de hoje</div>
+      <div id="home-os-list"><div class="loading"><div class="spin"></div><span>Carregando...</span></div></div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-tab on" data-nav="home"><div class="nic">🏠</div><div class="nlb">Início</div></button>
+    <button class="nav-tab" data-nav="todas"><div class="nic">📋</div><div class="nlb">Todas OS</div></button>
+    <button class="nav-tab" data-nav="perfil"><div class="nic">👤</div><div class="nlb">Perfil</div></button>
+  </div>
+</div>
+
+<!-- =================== TODAS AS OS =================== -->
+<div class="screen" id="screen-todas">
+  <div class="topnav"><h2>Minhas OS</h2></div>
+  <div class="scroll">
+    <div class="pad">
+      <div id="todas-os-list"><div class="loading"><div class="spin"></div><span>Carregando...</span></div></div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-tab" data-nav="home"><div class="nic">🏠</div><div class="nlb">Início</div></button>
+    <button class="nav-tab on" data-nav="todas"><div class="nic">📋</div><div class="nlb">Todas OS</div></button>
+    <button class="nav-tab" data-nav="perfil"><div class="nic">👤</div><div class="nlb">Perfil</div></button>
+  </div>
+</div>
+
+<!-- =================== PERFIL =================== -->
+<div class="screen" id="screen-perfil">
+  <div class="perfil-header">
+    <div class="perfil-avatar" id="perf-avatar"></div>
+    <div class="perfil-nome" id="perf-nome"></div>
+    <div class="perfil-cargo">Técnico de campo</div>
+  </div>
+  <div class="scroll">
+    <div class="pad">
+      <div class="perfil-item"><div class="perfil-item-ic">📧</div><div class="perfil-item-info"><div class="perfil-item-label">E-mail</div><div class="perfil-item-val" id="perf-email"></div></div></div>
+      <div class="perfil-item"><div class="perfil-item-ic">🌐</div><div class="perfil-item-info"><div class="perfil-item-label">Servidor</div><div class="perfil-item-val" id="perf-server"></div></div></div>
+      <div class="perfil-item"><div class="perfil-item-ic">🔒</div><div class="perfil-item-info"><div class="perfil-item-label">Perfil</div><div class="perfil-item-val">Técnico</div></div></div>
+      <button class="btn-logout" id="btn-logout">🚪 Sair da conta</button>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-tab" data-nav="home"><div class="nic">🏠</div><div class="nlb">Início</div></button>
+    <button class="nav-tab" data-nav="todas"><div class="nic">📋</div><div class="nlb">Todas OS</div></button>
+    <button class="nav-tab on" data-nav="perfil"><div class="nic">👤</div><div class="nlb">Perfil</div></button>
+  </div>
+</div>
+
+<!-- =================== DETALHE DA OS =================== -->
+<div class="screen" id="screen-os">
+  <div class="topnav">
+    <button class="back-btn" id="os-back">←</button>
+    <h2 id="os-title">OS</h2>
+    <span id="os-tipo-tag"></span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-tab="info"><div class="tab-ic">ℹ️</div><div class="tab-lb">Info</div></button>
+    <button class="tab" data-tab="checklist"><div class="tab-ic">✅</div><div class="tab-lb">Checklist</div></button>
+    <button class="tab" data-tab="medicoes"><div class="tab-ic">🌡️</div><div class="tab-lb">Medições</div></button>
+    <button class="tab" data-tab="fotos"><div class="tab-ic">📷</div><div class="tab-lb">Fotos</div></button>
+  </div>
+  <div class="scroll">
+    <!-- INFO -->
+    <div class="tab-content active pad" id="tab-info"></div>
+    <!-- CHECKLIST -->
+    <div class="tab-content pad" id="tab-checklist" style="display:none"></div>
+    <!-- MEDIÇÕES -->
+    <div class="tab-content pad" id="tab-medicoes" style="display:none"></div>
+    <!-- FOTOS -->
+    <div class="tab-content pad" id="tab-fotos" style="display:none"></div>
+  </div>
+</div>
+
+<!-- =================== CONCLUÍDA =================== -->
+<div class="screen" id="screen-concluida">
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div class="concl-screen">
+      <div class="concl-icon">✅</div>
+      <div style="font-size:26px;font-weight:800;margin-bottom:10px">OS Concluída!</div>
+      <div style="font-size:15px;color:#aaa;line-height:1.7;margin-bottom:36px">Todas as informações foram salvas com sucesso no servidor.</div>
+      <button class="btn-primary" id="btn-voltar-home">🏠 Voltar ao início</button>
+      <button class="btn-secondary" id="btn-ver-pdf">📄 Ver relatório</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== CONFIG ===================
+const API = window.location.origin + '/api';
+let TOKEN = localStorage.getItem('hvac_token');
+let USUARIO = JSON.parse(localStorage.getItem('hvac_usuario') || 'null');
+let OS_ATUAL = null;
+let CHECKS = [];
+let MED = {};
+let FOTOS = {antes:false,durante:false,depois:false};
+let SIGNED = false;
+let ACTIVE_TAB = 'info';
+let ACTIVE_NAV = 'home';
+let OS_ORIGEM = 'home'; // de onde veio (home ou todas)
+
+// =================== HELPERS ===================
+const TIPO_CLS = {Preventiva:'t-pr',Corretiva:'t-cr','Instalação':'t-in',PMOC:'t-pm','Emergência':'t-em',Garantia:'t-ga'};
+function tag(cls,txt){return`<span class="tag ${cls}">${txt}</span>`;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function fmtDate(d){if(!d)return'';const p=d.split('T')[0].split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+function ini(nome){return nome?nome.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase():'?';}
+function today(){const d=new Date();return d.toISOString().split('T')[0];}
+function diasSemana(){const d=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];const m=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];const n=new Date();return`${d[n.getDay()]}, ${n.getDate()} de ${m[n.getMonth()]} de ${n.getFullYear()}`;}
+
+// =================== API CALLS ===================
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: {'Content-Type':'application/json', 'Authorization': TOKEN ? `Bearer ${TOKEN}` : ''}
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.erro || 'Erro na requisição');
+  return data;
+}
+
+// =================== SCREENS ===================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// =================== NAV TABS ===================
+document.querySelectorAll('[data-nav]').forEach(btn => {
+  btn.onclick = () => {
+    ACTIVE_NAV = btn.dataset.nav;
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll(`[data-nav="${ACTIVE_NAV}"]`).forEach(t => t.classList.add('on'));
+    if (ACTIVE_NAV === 'home') { showScreen('home'); loadHome(); }
+    if (ACTIVE_NAV === 'todas') { showScreen('todas'); loadTodas(); }
+    if (ACTIVE_NAV === 'perfil') { showScreen('perfil'); loadPerfil(); }
+  };
+});
+
+// =================== LOGIN ===================
+document.getElementById('btn-login').onclick = async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('btn-login');
+  if (!email || !senha) { err.textContent = 'Preencha e-mail e senha.'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = '⏳ Entrando...';
+  err.classList.remove('show');
+  try {
+    const data = await api('POST', '/auth/login', {email, senha});
+    TOKEN = data.token;
+    USUARIO = data.usuario;
+    localStorage.setItem('hvac_token', TOKEN);
+    localStorage.setItem('hvac_usuario', JSON.stringify(USUARIO));
+    iniciarApp();
+  } catch (e) {
+    err.textContent = e.message || 'Usuário ou senha incorretos.';
+    err.classList.add('show');
+    btn.disabled = false; btn.innerHTML = '🔐 Entrar';
+  }
+};
+
+// Enter no campo senha
+document.getElementById('login-senha').onkeydown = e => {
+  if (e.key === 'Enter') document.getElementById('btn-login').click();
+};
+
+// =================== INIT APP ===================
+function iniciarApp() {
+  if (!TOKEN || !USUARIO) { showScreen('login'); return; }
+  showScreen('home');
+  loadHome();
+  document.getElementById('home-greeting').textContent = `Olá, ${USUARIO.nome.split(' ')[0]}! 👋`;
+  document.getElementById('home-date').textContent = diasSemana();
+  document.getElementById('home-avatar').textContent = ini(USUARIO.nome);
+}
+
+// =================== HOME ===================
+async function loadHome() {
+  const list = document.getElementById('home-os-list');
+  const alertas = document.getElementById('home-alertas');
+  list.innerHTML = '<div class="loading"><div class="spin"></div><span>Carregando...</span></div>';
+  try {
+    const todas = await api('GET', '/os');
+    const minhas = todas.filter(o => o.tecnico_id === USUARIO.id);
+    const hoje = minhas.filter(o => o.data_agenda && o.data_agenda.startsWith(today()));
+    const abertas = hoje.filter(o => o.status === 'Aberta' || o.status === 'Em andamento');
+    const concluidas = hoje.filter(o => o.status === 'Concluída');
+    document.getElementById('st-total').textContent = hoje.length;
+    document.getElementById('st-aber').textContent = abertas.length;
+    document.getElementById('st-conc').textContent = concluidas.length;
+    // Alertas
+    const emerg = hoje.filter(o => o.tipo === 'Emergência' && o.status !== 'Concluída');
+    alertas.innerHTML = emerg.map(o => `<div class="alert-card">⚠️ ${o.codigo} — Emergência às ${o.hora_agenda||''}</div>`).join('');
+    // Lista
+    if (!hoje.length) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhuma OS hoje</div><div class="empty-sub">Aproveite o dia!</div></div>`;
+      return;
+    }
+    list.innerHTML = hoje.map(o => buildOSCard(o)).join('');
+    bindOSCards();
+  } catch (e) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Erro ao carregar</div><div class="empty-sub">${e.message}</div></div>`;
+  }
+}
+
+// =================== TODAS AS OS ===================
+async function loadTodas() {
+  const list = document.getElementById('todas-os-list');
+  list.innerHTML = '<div class="loading"><div class="spin"></div><span>Carregando...</span></div>';
+  try {
+    const todas = await api('GET', '/os');
+    const minhas = todas.filter(o => o.tecnico_id === USUARIO.id);
+    if (!minhas.length) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhuma OS encontrada</div></div>`;
+      return;
+    }
+    list.innerHTML = minhas.map(o => buildOSCard(o, true)).join('');
+    bindOSCards();
+  } catch (e) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Erro ao carregar</div><div class="empty-sub">${e.message}</div></div>`;
+  }
+}
+
+function buildOSCard(o, showDate=false) {
+  return `<div class="os-card" data-os-id="${o.id}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div class="os-time">${o.hora_agenda||'--:--'}</div>
+      ${tag(TIPO_CLS[o.tipo]||'t-ab', o.tipo)}
+    </div>
+    ${showDate?`<div style="font-size:12px;color:var(--blue);font-weight:600;margin-bottom:4px">📅 ${fmtDate(o.data_agenda)}</div>`:''}
+    <div class="os-client">${o.cliente_nome||'Cliente'}</div>
+    <div class="os-addr">📍 ${o.cliente_end||'—'}</div>
+    <div class="os-footer">
+      <span class="os-id">${o.codigo}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${tag(o.status==='Aberta'?'t-ab':o.status==='Em andamento'?'t-an':'t-co', o.status)}
+        <span class="os-link">Abrir ›</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindOSCards() {
+  document.querySelectorAll('[data-os-id]').forEach(el => {
+    el.onclick = () => {
+      OS_ORIGEM = ACTIVE_NAV;
+      abrirOS(el.dataset.osId);
+    };
+  });
+}
+
+// =================== ABRIR OS ===================
+async function abrirOS(id) {
+  showScreen('os');
+  document.getElementById('tab-info').innerHTML = '<div class="loading"><div class="spin"></div><span>Carregando...</span></div>';
+  // Reset estado
+  ACTIVE_TAB = 'info';
+  FOTOS = {antes:false,durante:false,depois:false};
+  SIGNED = false;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab==='info'));
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = c.id==='tab-info'?'block':'none');
+  try {
+    const o = await api('GET', `/os/${id}`);
+    OS_ATUAL = o;
+    CHECKS = o.checklist || [];
+    MED = o.medicoes || {};
+    // Fotos já salvas
+    if (o.fotos) {
+      o.fotos.forEach(f => { if(f.tipo) FOTOS[f.tipo.toLowerCase()] = true; });
+    }
+    SIGNED = o.assinado || false;
+    // Header
+    document.getElementById('os-title').textContent = o.cliente_nome || o.codigo;
+    document.getElementById('os-tipo-tag').innerHTML = tag(TIPO_CLS[o.tipo]||'t-ab', o.tipo);
+    renderInfo(o);
+    renderChecklist();
+    renderMedicoes();
+    renderFotos();
+  } catch (e) {
+    document.getElementById('tab-info').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">${e.message}</div></div>`;
+  }
+}
+
+// =================== RENDER INFO ===================
+function renderInfo(o) {
+  const endEnc = encodeURIComponent(o.cliente_end || '');
+  document.getElementById('tab-info').innerHTML = `
+    <div class="sec-label">Endereço</div>
+    <div class="iblock">
+      <div style="font-size:14px;font-weight:600">${o.cliente_end||'—'}</div>
+      <a class="maps-btn" href="https://maps.google.com/?q=${endEnc}" target="_blank">🗺️ Abrir no Google Maps</a>
+    </div>
+    <div class="sec-label">Equipamento</div>
+    <div class="iblock">
+      <div class="irow"><span class="ilabel">Modelo</span><span class="ival">${(o.equip_marca||'')+" "+(o.equip_modelo||'')}</span></div>
+      <div class="irow"><span class="ilabel">Capacidade</span><span class="ival">${o.equip_cap||'—'}</span></div>
+      <div class="irow"><span class="ilabel">Nº série</span><span class="ival" style="font-family:monospace;font-size:12px">${o.equip_serie||'—'}</span></div>
+      <div class="irow"><span class="ilabel">Localização</span><span class="ival">${o.equip_local||'—'}</span></div>
+      <div class="irow"><span class="ilabel">Última manutenção</span><span class="ival">${fmtDate(o.equip_ult_manut)||'—'}</span></div>
+    </div>
+    <div class="sec-label">Observações</div>
+    <div class="iblock" style="font-size:14px;color:#5f5e5a;line-height:1.6">${o.observacoes||'Nenhuma observação.'}</div>
+    <button class="btn-primary" onclick="mudarTab('checklist')" style="margin-top:8px">✅ Iniciar checklist</button>
+  `;
+}
+
+// =================== RENDER CHECKLIST ===================
+function renderChecklist() {
+  const done = CHECKS.filter(c=>c.ok).length;
+  const pct = CHECKS.length ? Math.round(done/CHECKS.length*100) : 0;
+  document.getElementById('tab-checklist').innerHTML = `
+    <div class="pb"><div class="pf" style="width:${pct}%"></div></div>
+    <div class="pct-label">${done}/${CHECKS.length} itens — ${pct}%${pct===100?' ✓':''}</div>
+    <div class="iblock" style="padding:4px 16px">
+      ${CHECKS.map((c,i) => `
+        <div class="ck-item" data-ck="${i}">
+          <div class="ck-box${c.ok?' on':''}">${c.ok?'✓':''}</div>
+          <span class="ck-label${c.ok?' done':''}">${c.item||c.t||''}</span>
+        </div>`).join('')}
+    </div>
+    <button class="btn-primary" onclick="salvarChecklist();mudarTab('medicoes')">💾 Salvar e ir para medições</button>
+  `;
+  document.querySelectorAll('[data-ck]').forEach(el => {
+    el.onclick = () => {
+      const i = parseInt(el.dataset.ck);
+      CHECKS[i].ok = !CHECKS[i].ok;
+      renderChecklist();
+    };
+  });
+}
+
+// =================== RENDER MEDIÇÕES ===================
+function renderMedicoes() {
+  const campos = [
+    ['temp_amb','Temp. ambiente','°C'],['temp_insuf','Temp. insuflação','°C'],['temp_ret','Temp. retorno','°C'],
+    ['alta_pres','Alta pressão','bar'],['baixa_pres','Baixa pressão','bar'],['corrente','Corrente','A'],['tensao','Tensão','V']
+  ];
+  document.getElementById('tab-medicoes').innerHTML = `
+    <div class="sec-label">Temperaturas</div>
+    <div class="med-grid" style="margin-bottom:12px">
+      ${campos.slice(0,3).map(([k,l,u]) => `
+        <div class="med-card">
+          <div class="med-label">${l}</div>
+          <input class="med-input" id="m-${k}" value="${MED[k]||''}" placeholder="--" inputmode="decimal">
+          <div class="med-unit">${u}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sec-label">Pressões e elétrica</div>
+    <div class="med-grid">
+      ${campos.slice(3).map(([k,l,u]) => `
+        <div class="med-card">
+          <div class="med-label">${l}</div>
+          <input class="med-input" id="m-${k}" value="${MED[k]||''}" placeholder="--" inputmode="decimal">
+          <div class="med-unit">${u}</div>
+        </div>`).join('')}
+    </div>
+    <button class="btn-primary" onclick="salvarMedicoes();mudarTab('fotos')" style="margin-top:16px">💾 Salvar e ir para fotos</button>
+  `;
+}
+
+// =================== RENDER FOTOS ===================
+function renderFotos() {
+  document.getElementById('tab-fotos').innerHTML = `
+    <div class="sec-label">Registro fotográfico</div>
+    <div class="foto-grid">
+      ${[['antes','Antes'],['durante','Durante'],['depois','Depois']].map(([k,l]) => `
+        <div class="foto-box${FOTOS[k]?' ok':''}" data-foto="${k}">
+          ${FOTOS[k]?'✅':'📷'}
+          <div class="foto-lbl">${FOTOS[k]?'OK':l}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sec-label">Assinatura do cliente</div>
+    <div class="sign-area${SIGNED?' ok':''}" id="btn-sign">
+      <div class="sign-icon">${SIGNED?'✅':'✏️'}</div>
+      <div style="font-weight:700;font-size:15px">${SIGNED?'Assinado com sucesso':'Toque para assinar'}</div>
+      ${SIGNED?'<div style="font-size:12px;opacity:.7">Toque para remover</div>':'<div style="font-size:13px;opacity:.6">Cliente assina aqui</div>'}
+    </div>
+    ${SIGNED
+      ? `<button class="btn-success" id="btn-finalizar">✅ Finalizar OS</button>`
+      : `<button class="btn-secondary" onclick="alert('Solicite a assinatura do cliente antes de finalizar.')">🔒 Aguardando assinatura</button>`
+    }
+  `;
+  document.querySelectorAll('[data-foto]').forEach(el => {
+    el.onclick = () => { FOTOS[el.dataset.foto] = !FOTOS[el.dataset.foto]; renderFotos(); };
+  });
+  const btnSign = document.getElementById('btn-sign');
+  if (btnSign) btnSign.onclick = () => { SIGNED = !SIGNED; renderFotos(); };
+  const btnFin = document.getElementById('btn-finalizar');
+  if (btnFin) btnFin.onclick = finalizarOS;
+}
+
+// =================== TABS ===================
+function mudarTab(tab) {
+  ACTIVE_TAB = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab===tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = c.id===`tab-${tab}`?'block':'none');
+  window.scrollTo(0,0);
+}
+
+document.querySelectorAll('[data-tab]').forEach(btn => {
+  btn.onclick = () => {
+    salvarMedLocal();
+    mudarTab(btn.dataset.tab);
+  };
+});
+
+function salvarMedLocal() {
+  document.querySelectorAll('.med-input').forEach(el => {
+    const k = el.id.replace('m-','');
+    MED[k] = el.value;
+  });
+}
+
+// =================== SALVAR ===================
+async function salvarChecklist() {
+  if (!OS_ATUAL) return;
+  try {
+    await api('PATCH', `/os/${OS_ATUAL.id}/checklist`, { itens: CHECKS.map(c=>({id:c.id,ok:c.ok})) });
+    toast('Checklist salvo! ✅');
+  } catch(e) { toast('Erro ao salvar checklist'); }
+}
+
+async function salvarMedicoes() {
+  salvarMedLocal();
+  if (!OS_ATUAL) return;
+  try {
+    await api('PATCH', `/os/${OS_ATUAL.id}/medicoes`, MED);
+    toast('Medições salvas! ✅');
+  } catch(e) { toast('Erro ao salvar medições'); }
+}
+
+async function finalizarOS() {
+  if (!OS_ATUAL) return;
+  try {
+    await salvarChecklist();
+    await salvarMedicoes();
+    await api('PUT', `/os/${OS_ATUAL.id}`, {
+      tecnico_id: OS_ATUAL.tecnico_id,
+      tipo: OS_ATUAL.tipo,
+      status: 'Concluída',
+      data_agenda: OS_ATUAL.data_agenda,
+      hora_agenda: OS_ATUAL.hora_agenda,
+      observacoes: OS_ATUAL.observacoes,
+      assinado: true
+    });
+    showScreen('concluida');
+  } catch(e) { toast('Erro ao finalizar: ' + e.message); }
+}
+
+// =================== BACK ===================
+document.getElementById('os-back').onclick = () => {
+  if (OS_ORIGEM === 'todas') {
+    ACTIVE_NAV = 'todas';
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('on',t.dataset.nav==='todas'));
+    showScreen('todas'); loadTodas();
+  } else {
+    ACTIVE_NAV = 'home';
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('on',t.dataset.nav==='home'));
+    showScreen('home'); loadHome();
+  }
+};
+
+// =================== CONCLUÍDA ===================
+document.getElementById('btn-voltar-home').onclick = () => {
+  ACTIVE_NAV = 'home';
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('on',t.dataset.nav==='home'));
+  showScreen('home'); loadHome();
+};
+document.getElementById('btn-ver-pdf').onclick = () => {
+  if (OS_ATUAL) window.open(`${window.location.origin}?print=${OS_ATUAL.id}`, '_blank');
+  else toast('OS não encontrada');
+};
+
+// =================== PERFIL ===================
+function loadPerfil() {
+  if (!USUARIO) return;
+  document.getElementById('perf-avatar').textContent = ini(USUARIO.nome);
+  document.getElementById('perf-nome').textContent = USUARIO.nome;
+  document.getElementById('perf-email').textContent = USUARIO.email || '—';
+  document.getElementById('perf-server').textContent = window.location.hostname;
+}
+
+document.getElementById('btn-logout').onclick = () => {
+  if (!confirm('Deseja sair da conta?')) return;
+  TOKEN = null; USUARIO = null;
+  localStorage.removeItem('hvac_token');
+  localStorage.removeItem('hvac_usuario');
+  showScreen('login');
+};
+
+// =================== INIT ===================
+if (TOKEN && USUARIO) {
+  iniciarApp();
+}
+</script>
+</body>
+</html>
